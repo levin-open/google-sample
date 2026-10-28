@@ -1,0 +1,212 @@
+Common setup and commands
+
+# In Google Cloud Shell
+mkdir -p ~/cloudapp
+cd ~/cloudapp
+
+# Create/edit the Python file for the selected question
+nano main.py
+
+# No Flask: Gunicorn serves the WSGI application
+echo "gunicorn" > requirements.txt
+
+cat > app.yaml <<'EOF'
+runtime: python312
+entrypoint: gunicorn --bind :$PORT main:app
+EOF
+
+# Install dependency and run locally
+pip install -r requirements.txt
+gunicorn --bind 0.0.0.0:8080 main:app
+
+# Open Cloud Shell Web Preview on port 8080.
+# Stop local server with Ctrl+C.
+
+# Deploy (Google Cloud project and App Engine must be set up)
+gcloud app deploy
+gcloud app browse
+
+Each program below exposes a WSGI callable named app, so it can run with Gunicorn on App Engine. For Q30, the code also supports direct local execution with Python's built-in WSGI server.
+
+Q24 (Original Q3) — Hello World
+
+Save this program as main.py. For the next question, replace main.py with that question's code.
+
+def app(environ, start_response):
+    body = b'<h1>Hello World!</h1>'
+    start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
+    return [body]
+
+Q25 (Original Q11) — Personalized greeting
+
+Save this program as main.py. For the next question, replace main.py with that question's code.
+
+from urllib.parse import parse_qs
+from html import escape
+
+def app(environ, start_response):
+    if environ['REQUEST_METHOD'] == 'POST':
+        size = int(environ.get('CONTENT_LENGTH') or 0)
+        data = parse_qs(environ['wsgi.input'].read(size).decode('utf-8'))
+        name = escape(data.get('name', ['Guest'])[0])
+        body = f'<h1>Hello, {name}!</h1><a href="/">Back</a>'
+    else:
+        body = (
+            '<h2>Enter Your Name</h2>'
+            '<form method="post">'
+            '<input name="name" required>'
+            '<button type="submit">Submit</button></form>'
+        )
+    start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
+    return [body.encode('utf-8')]
+
+Q26 (Original Q19) — Student registration form
+
+Save this program as main.py. For the next question, replace main.py with that question's code.
+
+from urllib.parse import parse_qs
+from html import escape
+
+def app(environ, start_response):
+    if environ['REQUEST_METHOD'] == 'POST':
+        size = int(environ.get('CONTENT_LENGTH') or 0)
+        data = parse_qs(environ['wsgi.input'].read(size).decode('utf-8'))
+        name = escape(data.get('name', [''])[0])
+        roll = escape(data.get('roll', [''])[0])
+        course = escape(data.get('course', [''])[0])
+        body = (f'<h2>Registration Successful</h2>Name: {name}<br>'
+                f'Roll Number: {roll}<br>Course: {course}')
+    else:
+        body = (
+            '<h2>Student Registration</h2><form method="post">'
+            'Name: <input name="name" required><br><br>'
+            'Roll Number: <input name="roll" required><br><br>'
+            'Course: <input name="course" required><br><br>'
+            '<button type="submit">Register</button></form>'
+        )
+    start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
+    return [body.encode('utf-8')]
+
+Q27 (Original Q27) — List cloud computing services
+
+Save this program as main.py. For the next question, replace main.py with that question's code.
+
+def app(environ, start_response):
+    body = (
+        '<h2>Cloud Computing Services</h2><ul>'
+        '<li>Google Cloud Platform</li>'
+        '<li>Amazon Web Services</li>'
+        '<li>Microsoft Azure</li>'
+        '<li>Cloud Storage</li><li>Virtual Machines</li>'
+        '<li>Database Services</li></ul>'
+    )
+    start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
+    return [body.encode('utf-8')]
+
+Q28 (Original Q35) — Welcome page with navigation links
+
+Save this program as main.py. For the next question, replace main.py with that question's code.
+
+def app(environ, start_response):
+    path = environ.get('PATH_INFO', '/')
+    pages = {
+        '/': ('<h1>Welcome to My Website</h1>'
+              '<a href="/about">About</a><br>'
+              '<a href="/services">Services</a><br>'
+              '<a href="/contact">Contact</a>'),
+        '/about': '<h2>About Us</h2><a href="/">Home</a>',
+        '/services': '<h2>Our Services</h2><a href="/">Home</a>',
+        '/contact': '<h2>Contact Us</h2><a href="/">Home</a>'
+    }
+    if path in pages:
+        status, body = '200 OK', pages[path]
+    else:
+        status, body = '404 Not Found', '<h2>Page Not Found</h2><a href="/">Home</a>'
+    start_response(status, [('Content-Type', 'text/html; charset=utf-8')])
+    return [body.encode('utf-8')]
+
+Q29 (Original Q43) — Feedback form and confirmation
+
+Save this program as main.py. For the next question, replace main.py with that question's code.
+
+from urllib.parse import parse_qs
+from html import escape
+
+def app(environ, start_response):
+    if environ['REQUEST_METHOD'] == 'POST':
+        size = int(environ.get('CONTENT_LENGTH') or 0)
+        data = parse_qs(environ['wsgi.input'].read(size).decode('utf-8'))
+        name = escape(data.get('name', ['Visitor'])[0])
+        feedback = escape(data.get('feedback', [''])[0])
+        body = (f'<h2>Thank You, {name}!</h2><p>Your feedback: {feedback}</p>'
+                '<p>Feedback submitted successfully.</p><a href="/">Back</a>')
+    else:
+        body = (
+            '<h2>Feedback Form</h2><form method="post">'
+            'Name: <input name="name" required><br><br>'
+            'Feedback: <textarea name="feedback" required></textarea><br><br>'
+            '<button type="submit">Submit Feedback</button></form>'
+        )
+    start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
+    return [body.encode('utf-8')]
+
+Q30 (Original Q51) — Hello World and local execution
+
+Save this program as main.py. For the next question, replace main.py with that question's code.
+
+from wsgiref.simple_server import make_server
+
+def app(environ, start_response):
+    body = b'<h1>Hello World from Python!</h1>'
+    start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
+    return [body]
+
+if __name__ == '__main__':
+    server = make_server('0.0.0.0', 8080, app)
+    print('Server running on port 8080')
+    server.serve_forever()
+
+# Local standard-library run: python3 main.py
+# Cloud Shell: use Web Preview on port 8080.
+# App Engine deploy uses Gunicorn: gcloud app deploy
+
+Q31 (Original Q59) — Accept and display submitted information
+
+Save this program as main.py. For the next question, replace main.py with that question's code.
+
+from urllib.parse import parse_qs
+from html import escape
+
+def app(environ, start_response):
+    if environ['REQUEST_METHOD'] == 'POST':
+        size = int(environ.get('CONTENT_LENGTH') or 0)
+        data = parse_qs(environ['wsgi.input'].read(size).decode('utf-8'))
+        name = escape(data.get('name', [''])[0])
+        age = escape(data.get('age', [''])[0])
+        city = escape(data.get('city', [''])[0])
+        body = (f'<h2>Submitted Information</h2>Name: {name}<br>'
+                f'Age: {age}<br>City: {city}<br><a href="/">Back</a>')
+    else:
+        body = (
+            '<h2>Enter Your Information</h2><form method="post">'
+            'Name: <input name="name" required><br><br>'
+            'Age: <input name="age" type="number" required><br><br>'
+            'City: <input name="city" required><br><br>'
+            '<button type="submit">Submit</button></form>'
+        )
+    start_response('200 OK', [('Content-Type', 'text/html; charset=utf-8')])
+    return [body.encode('utf-8')]
+
+Q32 (Original Q63) — Incomplete question
+
+The question text provided ends at “Develop a simple Java or Python”. The remaining requirement is missing, so the intended program cannot be identified reliably.
+
+Quick command sequence
+
+cd ~/cloudapp
+nano main.py
+pip install -r requirements.txt
+gunicorn --bind 0.0.0.0:8080 main:app
+# Open Cloud Shell Web Preview on port 8080; stop with Ctrl+C
+gcloud app deploy
+gcloud app browse
