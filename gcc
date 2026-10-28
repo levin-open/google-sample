@@ -1,0 +1,768 @@
+1. Install GCC (only once)
+Open Ubuntu Terminal using Ctrl + Alt + T.
+sudo apt update
+sudo apt install gcc -y
+gcc --version
+
+2. Commands to create, compile and run any program
+Step 1 — Create a C file
+nano factorial.c
+
+Type or paste the C code. Save it using Ctrl + O, press Enter, then exit with Ctrl + X.
+
+Step 2 — Compile
+gcc factorial.c -o factorial
+
+Step 3 — Run
+./factorial
+
+Remember this pattern:
+nano filename.c
+gcc filename.c -o filename
+./filename
+
+Use the appropriate filename for each question. If GCC shows errors, correct the code and compile again.
+
+Q8. Factorial of a number
+File: factorial.c
+#include <stdio.h>
+
+int main() {
+    int n, i;
+    long long fact = 1;
+
+    printf("Enter a number: ");
+    scanf("%d", &n);
+
+    if (n < 0) {
+        printf("Factorial is not defined for negative numbers.\n");
+        return 0;
+    }
+
+    for (i = 1; i <= n; i++)
+        fact *= i;
+
+    printf("Factorial = %lld\n", fact);
+    return 0;
+}
+
+
+Commands:
+nano factorial.c
+gcc factorial.c -o factorial
+./factorial
+
+
+Q9. Check whether a number is prime
+File: prime.c
+#include <stdio.h>
+
+int main() {
+    int n, i, prime = 1;
+
+    printf("Enter a number: ");
+    scanf("%d", &n);
+
+    if (n < 2)
+        prime = 0;
+
+    for (i = 2; i <= n / i; i++) {
+        if (n % i == 0) {
+            prime = 0;
+            break;
+        }
+    }
+
+    if (prime)
+        printf("Prime number\n");
+    else
+        printf("Not a prime number\n");
+
+    return 0;
+}
+
+
+Commands:
+nano prime.c
+gcc prime.c -o prime
+./prime
+
+
+Q10. Largest of three numbers
+File: largest.c
+#include <stdio.h>
+
+int main() {
+    int a, b, c;
+
+    printf("Enter three numbers: ");
+    scanf("%d%d%d", &a, &b, &c);
+
+    if (a >= b && a >= c)
+        printf("Largest = %d\n", a);
+    else if (b >= a && b >= c)
+        printf("Largest = %d\n", b);
+    else
+        printf("Largest = %d\n", c);
+
+    return 0;
+}
+
+
+Commands:
+nano largest.c
+gcc largest.c -o largest
+./largest
+
+
+Q11. Addition, subtraction, multiplication and division
+File: calculator.c
+#include <stdio.h>
+
+int main() {
+    float a, b;
+
+    printf("Enter two numbers: ");
+    scanf("%f%f", &a, &b);
+
+    printf("Addition = %.2f\n", a + b);
+    printf("Subtraction = %.2f\n", a - b);
+    printf("Multiplication = %.2f\n", a * b);
+
+    if (b != 0)
+        printf("Division = %.2f\n", a / b);
+    else
+        printf("Division by zero is not possible.\n");
+
+    return 0;
+}
+
+
+Commands:
+nano calculator.c
+gcc calculator.c -o calculator
+./calculator
+
+
+Q12. Sort an array in ascending order
+File: sort.c
+#include <stdio.h>
+
+int main() {
+    int a[100], n, i, j, temp;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    if (n < 1 || n > 100)
+        return 0;
+
+    printf("Enter elements: ");
+    for (i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - 1 - i; j++) {
+            if (a[j] > a[j + 1]) {
+                temp = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("Sorted array: ");
+    for (i = 0; i < n; i++)
+        printf("%d ", a[i]);
+
+    printf("\n");
+    return 0;
+}
+
+
+Commands:
+nano sort.c
+gcc sort.c -o sort
+./sort
+
+
+Q13. Fibonacci series up to n terms
+File: fibonacci.c
+#include <stdio.h>
+
+int main() {
+    int n, i;
+    long long a = 0, b = 1, c;
+
+    printf("Enter number of terms: ");
+    scanf("%d", &n);
+
+    if (n < 1 || n > 90)
+        return 0;
+
+    for (i = 0; i < n; i++) {
+        printf("%lld ", a);
+        c = a + b;
+        a = b;
+        b = c;
+    }
+
+    printf("\n");
+    return 0;
+}
+
+
+Commands:
+nano fibonacci.c
+gcc fibonacci.c -o fibonacci
+./fibonacci
+
+
+Q14. Check whether a string is a palindrome
+File: palindrome.c
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char s[100];
+    int i, len, flag = 1;
+
+    printf("Enter a string: ");
+    scanf("%99s", s);
+
+    len = strlen(s);
+
+    for (i = 0; i < len / 2; i++) {
+        if (s[i] != s[len - 1 - i]) {
+            flag = 0;
+            break;
+        }
+    }
+
+    if (flag)
+        printf("Palindrome\n");
+    else
+        printf("Not a palindrome\n");
+
+    return 0;
+}
+
+
+Commands:
+nano palindrome.c
+gcc palindrome.c -o palindrome
+./palindrome
+
+
+Example: madam → Palindrome.
+Q15. Sum and average of n numbers
+File: sumavg.c
+#include <stdio.h>
+
+int main() {
+    int n, i, x;
+    long long sum = 0;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    if (n < 1)
+        return 0;
+
+    for (i = 0; i < n; i++) {
+        scanf("%d", &x);
+        sum += x;
+    }
+
+    printf("Sum = %lld\n", sum);
+    printf("Average = %.2f\n", (double)sum / n);
+
+    return 0;
+}
+
+
+Commands:
+nano sumavg.c
+gcc sumavg.c -o sumavg
+./sumavg
+
+
+Q16. Linear search
+File: linear.c
+#include <stdio.h>
+
+int main() {
+    int a[100], n, key, i, found = 0;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    if (n < 1 || n > 100)
+        return 0;
+
+    printf("Enter elements: ");
+    for (i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+
+    printf("Enter search element: ");
+    scanf("%d", &key);
+
+    for (i = 0; i < n; i++) {
+        if (a[i] == key) {
+            printf("Found at position %d\n", i + 1);
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found)
+        printf("Element not found\n");
+
+    return 0;
+}
+
+
+Commands:
+nano linear.c
+gcc linear.c -o linear
+./linear
+
+
+Q17. GCD of two integers
+File: gcd.c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int a, b, r;
+
+    printf("Enter two integers: ");
+    scanf("%d%d", &a, &b);
+
+    a = abs(a);
+    b = abs(b);
+
+    while (b != 0) {
+        r = a % b;
+        a = b;
+        b = r;
+    }
+
+    printf("GCD = %d\n", a);
+    return 0;
+}
+
+
+Commands:
+nano gcd.c
+gcc gcd.c -o gcd
+./gcd
+
+
+Q18. Binary search on a sorted array
+File: binary.c
+#include <stdio.h>
+
+int main() {
+    int a[100], n, key, i;
+    int low, high, mid, found = 0;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    if (n < 1 || n > 100)
+        return 0;
+
+    printf("Enter sorted elements: ");
+    for (i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+
+    printf("Enter search element: ");
+    scanf("%d", &key);
+
+    low = 0;
+    high = n - 1;
+
+    while (low <= high) {
+        mid = low + (high - low) / 2;
+
+        if (a[mid] == key) {
+            printf("Found at position %d\n", mid + 1);
+            found = 1;
+            break;
+        } else if (a[mid] < key) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    if (!found)
+        printf("Element not found\n");
+
+    return 0;
+}
+
+
+Commands:
+nano binary.c
+gcc binary.c -o binary
+./binary
+
+
+Remember: Binary search requires the array to be sorted.
+Q19. Implement a stack using an array
+File: stack.c
+
+A stack follows LIFO — Last In, First Out.
+#include <stdio.h>
+#define MAX 5
+
+int main() {
+    int s[MAX], top = -1, choice, x, i;
+
+    while (1) {
+        printf("\n1.Push  2.Pop  3.Display  4.Exit\n");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                if (top == MAX - 1)
+                    printf("Stack Overflow\n");
+                else {
+                    printf("Enter element: ");
+                    scanf("%d", &x);
+                    s[++top] = x;
+                }
+                break;
+
+            case 2:
+                if (top == -1)
+                    printf("Stack Underflow\n");
+                else
+                    printf("Popped = %d\n", s[top--]);
+                break;
+
+            case 3:
+                if (top == -1)
+                    printf("Stack is empty\n");
+                else {
+                    for (i = top; i >= 0; i--)
+                        printf("%d ", s[i]);
+                    printf("\n");
+                }
+                break;
+
+            case 4:
+                return 0;
+
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+}
+
+
+Commands:
+nano stack.c
+gcc stack.c -o stack
+./stack
+
+
+Q20. Implement a queue using an array
+File: queue.c
+
+A queue follows FIFO — First In, First Out.
+#include <stdio.h>
+#define MAX 5
+
+int main() {
+    int q[MAX], front = 0, rear = -1;
+    int choice, x, i;
+
+    while (1) {
+        printf("\n1.Enqueue  2.Dequeue  3.Display  4.Exit\n");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                if (rear == MAX - 1)
+                    printf("Queue Overflow\n");
+                else {
+                    printf("Enter element: ");
+                    scanf("%d", &x);
+                    q[++rear] = x;
+                }
+                break;
+
+            case 2:
+                if (front > rear)
+                    printf("Queue Underflow\n");
+                else
+                    printf("Deleted = %d\n", q[front++]);
+                break;
+
+            case 3:
+                if (front > rear)
+                    printf("Queue is empty\n");
+                else {
+                    for (i = front; i <= rear; i++)
+                        printf("%d ", q[i]);
+                    printf("\n");
+                }
+                break;
+
+            case 4:
+                return 0;
+
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+}
+
+
+Commands:
+nano queue.c
+gcc queue.c -o queue
+./queue
+
+
+This is a simple linear queue. Once its rear reaches the end, it cannot accept further elements even if earlier positions are free.
+Q21. Bubble sort
+File: bubble.c
+#include <stdio.h>
+
+int main() {
+    int a[100], n, i, j, temp;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    if (n < 1 || n > 100)
+        return 0;
+
+    printf("Enter elements: ");
+    for (i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - 1 - i; j++) {
+            if (a[j] > a[j + 1]) {
+                temp = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("Sorted array: ");
+    for (i = 0; i < n; i++)
+        printf("%d ", a[i]);
+
+    printf("\n");
+    return 0;
+}
+
+
+Commands:
+nano bubble.c
+gcc bubble.c -o bubble
+./bubble
+
+
+Q22. Singly linked list — insertion and display
+File: linkedlist.c
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *next;
+};
+
+int main() {
+    struct Node *head = NULL, *temp, *newnode;
+    int choice, x;
+
+    while (1) {
+        printf("\n1.Insert  2.Display  3.Exit\n");
+        scanf("%d", &choice);
+
+        if (choice == 1) {
+            newnode = malloc(sizeof(struct Node));
+
+            if (newnode == NULL) {
+                printf("Memory allocation failed\n");
+                return 1;
+            }
+
+            printf("Enter data: ");
+            scanf("%d", &x);
+
+            newnode->data = x;
+            newnode->next = NULL;
+
+            if (head == NULL) {
+                head = newnode;
+            } else {
+                temp = head;
+                while (temp->next != NULL)
+                    temp = temp->next;
+
+                temp->next = newnode;
+            }
+
+        } else if (choice == 2) {
+            temp = head;
+
+            while (temp != NULL) {
+                printf("%d -> ", temp->data);
+                temp = temp->next;
+            }
+
+            printf("NULL\n");
+
+        } else if (choice == 3) {
+            while (head != NULL) {
+                temp = head;
+                head = head->next;
+                free(temp);
+            }
+            return 0;
+
+        } else {
+            printf("Invalid choice\n");
+        }
+    }
+}
+
+
+Commands:
+nano linkedlist.c
+gcc linkedlist.c -o linkedlist
+./linkedlist
+
+
+Remember: Create a node → store data → connect it using next → traverse until NULL to display.
+Q23. Binary search tree — insertion and traversal
+File: bst.c
+
+This program inserts numbers into a BST and displays the inorder traversal, which prints the values in ascending order.
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
+
+struct Node *insert(struct Node *root, int x) {
+    if (root == NULL) {
+        struct Node *newnode = malloc(sizeof(struct Node));
+
+        if (newnode == NULL) {
+            printf("Memory allocation failed\n");
+            exit(1);
+        }
+
+        newnode->data = x;
+        newnode->left = newnode->right = NULL;
+        return newnode;
+    }
+
+    if (x < root->data)
+        root->left = insert(root->left, x);
+    else if (x > root->data)
+        root->right = insert(root->right, x);
+
+    return root;
+}
+
+void inorder(struct Node *root) {
+    if (root != NULL) {
+        inorder(root->left);
+        printf("%d ", root->data);
+        inorder(root->right);
+    }
+}
+
+void freeTree(struct Node *root) {
+    if (root != NULL) {
+        freeTree(root->left);
+        freeTree(root->right);
+        free(root);
+    }
+}
+
+int main() {
+    struct Node *root = NULL;
+    int n, x, i;
+
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    if (n < 0)
+        return 0;
+
+    for (i = 0; i < n; i++) {
+        printf("Enter element: ");
+        scanf("%d", &x);
+        root = insert(root, x);
+    }
+
+    printf("Inorder traversal: ");
+    inorder(root);
+    printf("\n");
+
+    freeTree(root);
+    return 0;
+}
+
+
+Commands:
+nano bst.c
+gcc bst.c -o bst
+./bst
+
+
+Remember: Smaller values go left, larger values go right. Inorder means Left → Root → Right.
+
+3. Quick revision — All 16 filenames and commands
+Q	Program	Filename
+8	Factorial	factorial.c
+9	Prime number	prime.c
+10	Largest of three	largest.c
+11	Arithmetic operations	calculator.c
+12	Array sorting	sort.c
+13	Fibonacci series	fibonacci.c
+14	String palindrome	palindrome.c
+15	Sum and average	sumavg.c
+16	Linear search	linear.c
+17	GCD	gcd.c
+18	Binary search	binary.c
+19	Stack	stack.c
+20	Queue	queue.c
+21	Bubble sort	bubble.c
+22	Singly linked list	linkedlist.c
+23	Binary search tree	bst.c
+
+For every program, the three commands follow the same pattern:
+nano filename.c
+gcc filename.c -o filename
+./filename
+
+
+Replace filename with the program's name, without .c, in the compile and run commands.
+Most important things to memorise tonight
+- Factorial: multiplication inside a loop.
+- Prime: check divisibility using %.
+- Fibonacci: next term = previous two terms added.
+- Palindrome: compare characters from both ends.
+- Linear search: check elements one by one.
+- Binary search: halve a sorted array repeatedly.
+- Bubble sort: compare adjacent elements and swap.
+- Stack: push, pop, LIFO.
+- Queue: enqueue, dequeue, FIFO.
+- Linked list: nodes connected using pointers.
+- BST: smaller left, larger right.
