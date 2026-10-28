@@ -1,0 +1,275 @@
+Docker Images, Containers, and Docker Hub
+Cloud Computing Lab Exam — Command Reference
+
+Based on the supplied question bank: Experiment 8 (Q49–Q53) and Experiment 9 (Q54–Q64). Commands assume Ubuntu/Linux with Docker installed. Replace example names/ports only when needed.
+
+A. Common setup — install and verify Docker
+
+# Install Docker on Ubuntu
+sudo apt update
+sudo apt install docker.io -y
+
+# Start Docker and enable it at boot
+sudo systemctl enable --now docker
+
+# Verify installation
+docker --version
+sudo docker run hello-world
+
+If your lab account does not have permission to run Docker without sudo, keep using sudo before Docker commands. Do not change permissions on a shared lab machine unless your instructor authorizes it.
+
+EXPERIMENT 8 — Creating and executing Docker containers/images
+
+Q49 (Original Q4) — Run a Hello World container
+
+sudo docker run hello-world
+
+Expected: Docker downloads the image if needed, runs it, and prints a successful installation message.
+
+Q50 (Original Q20) — Create, start, stop, restart and inspect status
+
+# Create a container
+sudo docker create --name labbox ubuntu:latest
+
+# Start it
+sudo docker start labbox
+
+# Show container status
+sudo docker ps -a
+
+# Stop it
+sudo docker stop labbox
+
+# Restart it
+sudo docker start labbox
+
+# Show status again
+sudo docker ps -a
+
+# Remove it when finished
+sudo docker rm -f labbox
+
+A newly created Ubuntu container exits when its main process ends. Use Q61 for an interactive shell.
+
+Q51 (Original Q28) — Build an image using a Dockerfile
+
+mkdir -p ~/docker-lab
+cd ~/docker-lab
+
+cat > Dockerfile <<'EOF'
+FROM ubuntu:latest
+CMD ["echo", "Hello from my custom Docker image!"]
+EOF
+
+sudo docker build -t myhello:1.0 .
+sudo docker images
+sudo docker run --name myhello-container myhello:1.0
+
+Q52 (Original Q40) — List, inspect and remove images/containers
+
+# List running containers
+sudo docker ps
+
+# List all containers, including stopped ones
+sudo docker ps -a
+
+# List downloaded images
+sudo docker images
+
+# Inspect a container
+sudo docker inspect myhello-container
+
+# View container logs
+sudo docker logs myhello-container
+
+# Remove the container
+sudo docker rm myhello-container
+
+# Remove the image (only after its container is removed)
+sudo docker rmi myhello:1.0
+
+Q53 (Original Q52) — Build and run a simple web app image
+
+mkdir -p ~/web-lab
+cd ~/web-lab
+
+echo '<h1>Hello from Docker Web App!</h1>' > index.html
+
+cat > Dockerfile <<'EOF'
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/index.html
+EOF
+
+sudo docker build -t myweb:1.0 .
+sudo docker run -d --name myweb-container -p 8080:80 myweb:1.0
+
+# Test in browser at http://localhost:8080
+# If on a remote VM, use its reachable IP address and port 8080.
+
+sudo docker logs myweb-container
+sudo docker stop myweb-container
+sudo docker rm myweb-container
+
+EXPERIMENT 9 — Running and managing containers from Docker Hub
+
+Q54 (Original Q8) — Pull Linux image and run commands
+
+sudo docker pull ubuntu:latest
+sudo docker run --name ubuntu-lab -it ubuntu:latest
+# Inside the container, run:
+ls
+pwd
+mkdir demo
+cd demo
+touch sample.txt
+ls -l
+exit
+
+# After exiting, check container
+sudo docker ps -a
+
+Q55 (Original Q12) — Run Nginx and access its default page
+
+sudo docker pull nginx
+sudo docker run -d --name nginx-lab -p 8080:80 nginx
+sudo docker ps
+sudo docker logs nginx-lab
+
+# Open browser: http://localhost:8080
+# On a remote VM, use http://VM_IP:8080 if firewall/network permits.
+
+sudo docker stop nginx-lab
+sudo docker rm nginx-lab
+
+Q56 (Original Q16) — Ubuntu container file/directory operations
+
+sudo docker run --name ubuntu-files -it ubuntu:latest
+# Inside the container:
+pwd
+ls
+mkdir cloudlab
+cd cloudlab
+echo "Docker file test" > sample.txt
+cat sample.txt
+ls -l
+cd /
+exit
+
+# Optional: remove container after demonstration
+sudo docker rm ubuntu-files
+
+Q57 (Original Q24) — Run Apache HTTPD and access its page
+
+sudo docker pull httpd
+sudo docker run -d --name apache-lab -p 8081:80 httpd
+sudo docker ps
+sudo docker logs apache-lab
+
+# Open browser: http://localhost:8081
+# On remote VM: http://VM_IP:8081, if reachable.
+
+sudo docker stop apache-lab
+sudo docker rm apache-lab
+
+Q58 (Original Q32) — Map host port to container port
+
+# Host port 8082 maps to container port 80
+sudo docker run -d --name port-demo -p 8082:80 nginx
+
+sudo docker port port-demo
+sudo docker ps
+
+# Open http://localhost:8082
+sudo docker stop port-demo
+sudo docker rm port-demo
+
+Syntax: -p HOST_PORT:CONTAINER_PORT.
+
+Q59 (Original Q36) — Run Redis and inspect/execute commands
+
+sudo docker pull redis
+sudo docker run -d --name redis-lab redis
+sudo docker ps
+sudo docker inspect redis-lab
+
+# Run Redis CLI inside the container
+sudo docker exec -it redis-lab redis-cli
+# At the Redis prompt:
+PING
+SET labkey "hello"
+GET labkey
+EXIT
+
+sudo docker logs redis-lab
+sudo docker stop redis-lab
+sudo docker rm redis-lab
+
+Q60 (Original Q44) — Run a database container and view status/logs
+
+Use PostgreSQL with a disposable lab password only. Do not use a real or reused password.
+
+sudo docker pull postgres:16
+sudo docker run -d --name postgres-lab \
+  -e POSTGRES_PASSWORD=LabOnly123 \
+  -e POSTGRES_DB=labdb \
+  postgres:16
+
+sudo docker ps -a
+sudo docker logs postgres-lab
+sudo docker inspect postgres-lab
+
+# Clean up after demonstration
+sudo docker stop postgres-lab
+sudo docker rm postgres-lab
+
+This example does not publish the database port to the host. It demonstrates container status and logs without exposing the database externally.
+
+Q61 (Original Q48) — Interactive container and shell commands
+
+sudo docker run --name interactive-lab -it ubuntu:latest
+# Inside:
+pwd
+ls -la
+mkdir practice
+cd practice
+touch one.txt
+echo "Hello Docker" > two.txt
+cat two.txt
+ls -l
+exit
+
+sudo docker rm interactive-lab
+
+Q62 (Original Q56) — Run a web server with port mapping
+
+sudo docker pull nginx
+sudo docker run -d --name web-port-lab -p 8083:80 nginx
+sudo docker ps
+sudo docker port web-port-lab
+
+# Open browser: http://localhost:8083
+sudo docker logs web-port-lab
+sudo docker stop web-port-lab
+sudo docker rm web-port-lab
+
+Q63 (Original Q60) — View logs/configuration, stop and remove
+
+sudo docker run -d --name inspect-lab nginx
+sudo docker ps
+sudo docker logs inspect-lab
+sudo docker inspect inspect-lab
+sudo docker stop inspect-lab
+sudo docker ps -a
+sudo docker rm inspect-lab
+
+Q64 (Original Q64) — Create container and configure required port
+
+sudo docker pull nginx
+sudo docker run -d --name final-web -p 8084:80 nginx
+sudo docker ps
+sudo docker port final-web
+
+# Open browser: http://localhost:8084
+sudo docker logs final-web
+sudo docker stop final-web
+sudo docker rm final-web
