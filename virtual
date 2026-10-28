@@ -1,0 +1,142 @@
+Q1. Install VirtualBox and create a Linux VM
+1. Download and install Oracle VirtualBox on Windows.
+2. Download an Ubuntu ISO.
+3. Open VirtualBox → click New.
+4. Enter name: Ubuntu-Linux; select the Ubuntu ISO.
+5. Allocate RAM (4 GB), CPU (2 cores) and virtual disk (25–30 GB).
+6. Select NAT under Settings → Network.
+7. Click Start and install Ubuntu.
+8. Restart and show the Ubuntu desktop.
+Result: Linux VM created and configured successfully.
+Q2. Install Linux, demonstrate boot, networking and shared folder
+1. Create a VM and attach the Ubuntu ISO.
+2. Start the VM → select Install Ubuntu.
+3. Complete installation and restart.
+4. Open Terminal and execute:
+ip addr
+ping -c 4 google.com
+
+
+5. Shut down the VM → Settings → Shared Folders.
+6. Add a Windows folder and enable Auto-mount.
+7. Install Guest Additions if necessary.
+8. Restart and access the shared folder.
+Result: Linux boot, networking and shared folder demonstrated.
+Q3. Create a Windows/Linux VM and configure hardware
+1. Open VirtualBox → New.
+2. Enter VM name and select the OS ISO.
+3. Configure RAM and CPU.
+4. Create a virtual hard disk.
+5. Open Settings → System and verify CPU/RAM.
+6. Open Settings → Storage and verify the disk/ISO.
+7. Open Settings → Network and select NAT or Bridged.
+8. Start the VM and demonstrate it running.
+Result: VM created with the required hardware and network settings.
+Q4. Create and restore a snapshot
+1. Create and install a Linux VM.
+2. Start the VM and confirm it works.
+3. Shut down the VM.
+4. Select the VM → Snapshots → Take Snapshot.
+5. Name it Before-Changes.
+6. Start the VM and create a test file:
+touch ~/test.txt
+
+
+7. Shut down → Snapshots → select Before-Changes → Restore.
+8. Start the VM and verify the test file is absent.
+Result: Snapshot created and successfully restored.
+
+Remember: Snapshot = save state; Restore = return to saved state.
+Q5. Create two VMs and test connectivity
+1. Create two Linux VMs: VM1 and VM2.
+2. Open Settings → Network for both.
+3. Select Internal Network and use the same name, LabNet.
+4. Start both VMs.
+5. Check the network interface:
+ip addr
+
+
+6. Assign IP addresses to the actual interface (example enp0s3).
+
+VM1:
+sudo ip addr add 192.168.10.1/24 dev enp0s3
+
+
+VM2:
+sudo ip addr add 192.168.10.2/24 dev enp0s3
+
+
+7. Test from VM1:
+ping -c 4 192.168.10.2
+
+
+Result: Both VMs communicate over the internal network.
+Q6. Configure a Windows–Linux shared folder
+1. Create C:\VMShare in Windows.
+2. Shut down the Linux VM.
+3. Open Settings → Shared Folders.
+4. Click Add Folder.
+5. Select C:\VMShare.
+6. Set folder name to VMShare.
+7. Enable Auto-mount and Make Permanent.
+8. Start Linux and ensure Guest Additions are installed.
+9. Access the folder:
+ls /media/sf_VMShare
+
+
+If permission is denied:
+sudo usermod -aG vboxsf $USER
+
+
+Log out and back in or restart.
+
+Result: Windows files are accessible from Linux.
+Q7. Configure NAT or Bridged networking
+1. Select the Linux VM in VirtualBox.
+2. Shut down the VM.
+3. Open Settings → Network → Adapter 1.
+4. Enable Network Adapter.
+5. Select NAT or Bridged Adapter.
+6. For Bridged, select the physical network interface if prompted.
+7. Start the VM.
+8. Check the IP address:
+ip addr
+
+
+9. Test connectivity:
+ping -c 4 google.com
+
+
+Result: Network configured and connectivity tested.
+
+Last-minute memory table
+Question	Key word to remember
+Q1	Install → New VM → ISO
+Q2	Boot → IP → Shared folder
+Q3	CPU → RAM → Disk → Network
+Q4	Snapshot → Change → Restore
+Q5	Two VMs → Same network → Ping
+Q6	Host folder → Auto-mount → Guest Additions
+Q7	Settings → Network → NAT/Bridged
+
+Five commands worth memorising
+ip addr
+
+
+Displays IP addresses and network interfaces.
+ping -c 4 google.com
+
+
+Tests connectivity and DNS resolution.
+uname -a
+
+
+Displays Linux system information.
+whoami
+
+
+Displays the current username.
+ls /media/sf_VMShare
+
+
+Lists files in a typical auto-mounted VirtualBox shared folder.
