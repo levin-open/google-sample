@@ -1,0 +1,296 @@
+A. Common setup (do this once)
+
+Use Google Cloud Shell or a local terminal with Java and Maven installed. Check:
+
+java -version
+mvn -version
+gcloud --version
+
+Create the Maven web application folders:
+
+mkdir -p ~/appengine-java/src/main/java/com/example
+mkdir -p ~/appengine-java/src/main/webapp/WEB-INF
+cd ~/appengine-java
+
+Create pom.xml:
+
+cat > pom.xml <<'EOF'
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>appengine-java</artifactId>
+  <version>1.0</version>
+  <packaging>war</packaging>
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <finalName>app</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+EOF
+
+Create the App Engine configuration:
+
+cat > src/main/webapp/WEB-INF/appengine-web.xml <<'EOF'
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+  <runtime>java17</runtime>
+</appengine-web-app>
+EOF
+
+Common build, local testing and deployment
+
+# Build the WAR file
+mvn clean package
+
+# A servlet needs a servlet container for local execution.
+# Use your college's App Engine development server/launcher if provided,
+# or deploy to App Engine after setting up the Google Cloud project.
+
+gcloud app deploy
+gcloud app browse
+
+Note: App Engine Java deployment tools depend on the runtime and lab setup. Use the SDK/runtime version specified by your instructor. A servlet is not a standalone Java main() program.
+
+Q33 (Original Q7) — Simple Java web application
+
+Save this code as src/main/java/com/example/MainServlet.java, replacing the previous question's code.
+
+package com.example;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebServlet("/")
+public class MainServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
+        resp.getWriter().println("<h1>Welcome to Google App Engine</h1>");
+    }
+}
+
+Q34 (Original Q15) — Current date and time
+
+Save this code as src/main/java/com/example/MainServlet.java, replacing the previous question's code.
+
+package com.example;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.time.LocalDateTime;
+
+@WebServlet("/")
+public class MainServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
+        resp.getWriter().println("<h2>Current Date and Time: "
+                + LocalDateTime.now() + "</h2>");
+    }
+}
+
+Q35 (Original Q23) — Java Hello World
+
+Save this code as src/main/java/com/example/MainServlet.java, replacing the previous question's code.
+
+package com.example;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebServlet("/")
+public class MainServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
+        resp.getWriter().println("<h1>Hello World!</h1>");
+    }
+}
+
+Q36 (Original Q31) — Calculator web application
+
+Save this code as src/main/java/com/example/MainServlet.java, replacing the previous question's code.
+
+package com.example;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebServlet("/")
+public class MainServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
+        resp.getWriter().println(
+            "<h2>Simple Calculator</h2>" +
+            "<form method='post'>" +
+            "<input type='number' step='any' name='a' required>" +
+            "<select name='op'><option>+</option><option>-</option>" +
+            "<option>*</option><option>/</option></select>" +
+            "<input type='number' step='any' name='b' required>" +
+            "<button type='submit'>Calculate</button></form>");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
+        try {
+            double a = Double.parseDouble(req.getParameter("a"));
+            double b = Double.parseDouble(req.getParameter("b"));
+            String op = req.getParameter("op");
+            double result;
+            switch (op) {
+                case "+" -> result = a + b;
+                case "-" -> result = a - b;
+                case "*" -> result = a * b;
+                case "/" -> {
+                    if (b == 0) {
+                        resp.getWriter().println("<h2>Cannot divide by zero</h2>");
+                        return;
+                    }
+                    result = a / b;
+                }
+                default -> {
+                    resp.getWriter().println("<h2>Invalid operation</h2>");
+                    return;
+                }
+            }
+            resp.getWriter().println("<h2>Result: " + result + "</h2><a href='/'>Back</a>");
+        } catch (NumberFormatException | NullPointerException ex) {
+            resp.getWriter().println("<h2>Please enter valid numbers</h2><a href='/'>Back</a>");
+        }
+    }
+}
+
+Q37 (Original Q39) — Student details page
+
+Save this code as src/main/java/com/example/MainServlet.java, replacing the previous question's code.
+
+package com.example;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebServlet("/")
+public class MainServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
+        resp.getWriter().println(
+            "<h2>Student Details</h2>" +
+            "<p>Name: Student Name</p>" +
+            "<p>Register Number: 101</p>" +
+            "<p>Department: Computer Science</p>" +
+            "<p>College: My College</p>");
+    }
+}
+
+Q38 (Original Q47) — Product catalogue
+
+Save this code as src/main/java/com/example/MainServlet.java, replacing the previous question's code.
+
+package com.example;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebServlet("/")
+public class MainServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
+        resp.getWriter().println(
+            "<h2>Product Catalogue</h2><table border='1' cellpadding='8'>" +
+            "<tr><th>Product</th><th>Price</th></tr>" +
+            "<tr><td>Keyboard</td><td>700</td></tr>" +
+            "<tr><td>Mouse</td><td>350</td></tr>" +
+            "<tr><td>Monitor</td><td>6500</td></tr></table>");
+    }
+}
+
+Q39 (Original Q55) — Request handling
+
+Save this code as src/main/java/com/example/MainServlet.java, replacing the previous question's code.
+
+package com.example;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebServlet("/")
+public class MainServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
+        resp.getWriter().println(
+            "<h2>Request Handling Demo</h2>" +
+            "<form method='post'>Message: <input name='message' required>" +
+            "<button type='submit'>Send</button></form>");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        resp.setContentType("text/html;charset=UTF-8");
+        String message = req.getParameter("message");
+        if (message == null) message = "";
+        message = message.replace("&", "&amp;").replace("<", "&lt;")
+                         .replace(">", "&gt;").replace("\"", "&quot;")
+                         .replace("'", "&#x27;");
+        resp.getWriter().println("<h2>POST request received</h2><p>Message: "
+                + message + "</p><a href='/'>Back</a>");
+    }
+}
+
+
+
+
+GET and POST request handling
