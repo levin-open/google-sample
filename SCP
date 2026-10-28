@@ -1,0 +1,84 @@
+Secure File Transfer Between Virtual Machines Using SSH/SCP
+Cloud Computing Lab Exam Notes
+
+Question 44 (Original Q25): Create two Linux virtual machines and demonstrate a method of transferring files from one virtual machine to the other using SCP or an appropriate shared-folder/network method.
+
+Aim
+
+To create two Linux virtual machines and securely transfer a file from one VM to another using SSH/SCP.
+
+Requirements
+
+Two Linux VMs (VM1 and VM2), for example Ubuntu in VirtualBox.
+
+Both VMs connected to the same reachable network (Host-only or Internal Network; bridged also works where allowed).
+
+OpenSSH server on the receiving VM and OpenSSH client on the sending VM.
+
+A sample file to transfer.
+
+Procedure A — Configure the VMs
+
+Create or start two Ubuntu VMs: VM1 (sender) and VM2 (receiver).
+
+In each VM, open Settings → Network and configure both adapters on the same network. For an isolated lab, use a Host-only network, or an Internal Network if external access is not needed.
+
+Start both VMs and verify each has an IP address using the command below.
+
+ip addr
+
+Procedure B — Prepare the receiving VM (VM2)
+
+Run these commands on VM2:
+
+sudo apt update
+sudo apt install openssh-server -y
+sudo systemctl enable --now ssh
+hostname -I
+
+Record the IP address shown by hostname -I. Example only: 192.168.56.102. Use your actual VM2 address.
+
+Procedure C — Create a test file on VM1
+
+Run these commands on VM1:
+
+echo "This is a secure file transfer test." > sample.txt
+ls -l sample.txt
+hostname -I
+
+Procedure D — Transfer the file using SCP
+
+On VM1, run the command below. Replace receiver_username and RECEIVER_IP with the username and IP address of VM2:
+
+scp sample.txt receiver_username@RECEIVER_IP:~/
+
+Accept the SSH host key prompt only if the address belongs to your VM2, then enter VM2 user password if password authentication is enabled.
+
+Procedure E — Verify the transfer on VM2
+
+On VM2, run:
+
+ls -l ~/sample.txt
+cat ~/sample.txt
+
+Expected output includes the file name and the text: This is a secure file transfer test.
+
+If SCP fails
+
+Check connectivity from VM1: ping -c 4 RECEIVER_IP (replace with VM2 IP).
+
+Check SSH service on VM2: sudo systemctl status ssh.
+
+Check both VMs are on the same reachable network and use the correct IP address and username.
+
+If SSH authentication is blocked, check the lab VM SSH settings. Do not disable security controls unnecessarily.
+
+If ping is blocked by a firewall, SCP may still work; test SSH using: ssh receiver_username@RECEIVER_IP.
+
+Alternative — Shared folder
+
+If SCP networking is unavailable and the examiner permits a shared-folder method, configure a shared folder in the VM software, install Guest Additions if required, and copy the file into the mounted shared folder. This demonstrates file sharing, but it is not the same as a direct SCP transfer over SSH.
+
+Result
+
+A sample file was securely transferred from VM1 to VM2 using SCP over SSH and verified on the receiving VM.
