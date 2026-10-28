@@ -1,0 +1,193 @@
+Hadoop Single-Node Cluster and WordCount
+Cloud Computing Lab Exam Notes
+
+Covers questions 45–48: single-node Hadoop setup, pseudo-distributed services and HDFS commands, MapReduce WordCount, and HDFS file upload/list/retrieval.
+
+1. Install Java and Hadoop prerequisites (Q45)
+
+Run commands in an Ubuntu/Linux terminal. Hadoop version and Java compatibility can vary by lab; use the versions specified by your instructor.
+
+sudo apt update
+sudo apt install openjdk-11-jdk ssh rsync -y
+java -version
+
+Download and extract the Hadoop binary distribution provided/approved for your lab. Example for Hadoop 3.3.6:
+
+cd ~
+wget https://archive.apache.org/dist/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
+tar -xzf hadoop-3.3.6.tar.gz
+mv hadoop-3.3.6 hadoop
+
+2. Set environment variables (Q45)
+
+cat >> ~/.bashrc <<'EOF'
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export HADOOP_HOME=$HOME/hadoop
+export HADOOP_INSTALL=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+EOF
+
+source ~/.bashrc
+
+If your Java path differs, find it with: readlink -f $(which java)
+
+3. Configure Hadoop files (Q45)
+
+Edit each file under $HADOOP_HOME/etc/hadoop/.
+
+hadoop-env.sh
+
+# Ensure this line is present:
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+core-site.xml
+
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://localhost:9000</value>
+  </property>
+</configuration>
+
+hdfs-site.xml
+
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>1</value>
+  </property>
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>file:///home/YOUR_USERNAME/hadoopdata/namenode</value>
+  </property>
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file:///home/YOUR_USERNAME/hadoopdata/datanode</value>
+  </property>
+</configuration>
+
+mapred-site.xml
+
+<configuration>
+  <property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+  </property>
+</configuration>
+
+yarn-site.xml
+
+<configuration>
+  <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+  </property>
+</configuration>
+
+Replace YOUR_USERNAME with the output of whoami, or use a correct absolute home directory. Create the NameNode/DataNode directories before formatting.
+
+4. Configure passwordless SSH and start Hadoop (Q46)
+
+sudo service ssh start
+ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+ssh localhost
+
+# Format the NameNode only on first setup:
+hdfs namenode -format
+
+# Start HDFS and YARN:
+start-dfs.sh
+start-yarn.sh
+
+# Check running Java services:
+jps
+
+Do not repeatedly format the NameNode after storing HDFS data; formatting can make existing HDFS metadata/data inaccessible. In a VM/container where systemd is unavailable, use the supported SSH service command for that environment.
+
+5. HDFS commands (Q46 and Q48)
+
+hdfs dfs -mkdir -p /user/$USER/input
+echo "Hadoop is a distributed computing framework. Hadoop processes big data." > sample.txt
+
+# Upload local file to HDFS
+hdfs dfs -put -f sample.txt /user/$USER/input/
+
+# List files
+hdfs dfs -ls /user/$USER/input
+
+# Display file contents
+hdfs dfs -cat /user/$USER/input/sample.txt
+
+# Download file from HDFS to local directory
+hdfs dfs -get /user/$USER/input/sample.txt ./downloaded.txt
+cat downloaded.txt
+
+6. Run MapReduce WordCount (Q47)
+
+Create input text and upload it to HDFS:
+
+mkdir -p ~/wordcount-input
+echo "hello hadoop hello cloud" > ~/wordcount-input/input.txt
+echo "hadoop cloud computing" >> ~/wordcount-input/input.txt
+
+hdfs dfs -mkdir -p /wordcount/input
+hdfs dfs -put -f ~/wordcount-input/input.txt /wordcount/input/
+
+# Remove old output directory if it exists
+hdfs dfs -rm -r -f /wordcount/output
+
+# Run the built-in WordCount example JAR
+hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-*.jar wordcount /wordcount/input /wordcount/output
+
+# Display word-frequency output
+hdfs dfs -cat /wordcount/output/part-r-00000
+
+Expected counts for the sample input (case-sensitive):
+
+cloud  2\ncomputing  1\nhadoop  2\nhello  2
+
+7. Useful checks and troubleshooting
+
+Check Java: java -version
+
+Check Hadoop: hadoop version
+
+Check daemons: jps (look for NameNode, DataNode, ResourceManager and NodeManager)
+
+Check HDFS health/listing: hdfs dfs -ls /
+
+If SSH fails, verify SSH is running and passwordless localhost login works.
+
+If a job fails because output exists, remove its HDFS output directory before rerunning.
+
+If Hadoop reports JAVA_HOME errors, correct JAVA_HOME in both ~/.bashrc and hadoop-env.sh.
+
+If the example JAR wildcard does not resolve as expected, list the files in $HADOOP_HOME/share/hadoop/mapreduce/.
+
+8. Results to state in the exam
+
+Q45: Hadoop installed and environment/configuration files prepared.
+
+Q46: HDFS/YARN services started and Hadoop commands demonstrated.
+
+Q47: MapReduce WordCount executed and word-frequency output displayed.
+
+Q48: HDFS directory created, file uploaded, listed, displayed and downloaded.
+
+Quick command memory
+
+start-dfs.sh
+start-yarn.sh
+jps
+hdfs dfs -mkdir -p /input
+hdfs dfs -put sample.txt /input/
+hdfs dfs -ls /input
+hdfs dfs -cat /input/sample.txt
+hdfs dfs -get /input/sample.txt .
+hdfs dfs -cat /wordcount/output/part-r-00000
