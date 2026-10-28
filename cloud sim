@@ -1,0 +1,212 @@
+CloudSim Simulation and Custom Scheduling
+Cloud Computing Lab Exam Notes
+
+Covers the four supplied question-bank tasks: create a basic CloudSim simulation; run multiple VMs/cloudlets and show makespan; implement a custom scheduling algorithm; compare a custom policy with a baseline policy.
+
+1. What you need
+
+CloudSim is a Java-based simulation toolkit. It does not create real cloud servers; it simulates datacenters, hosts, virtual machines, cloudlets (jobs), and scheduling.
+
+Use the CloudSim version supplied by your instructor. The code below targets the classic CloudSim 3.x API (org.cloudbus.cloudsim.*). CloudSim Plus uses a different API, so these examples may need adaptation if your lab uses CloudSim Plus.
+
+2. Common setup
+
+# Check Java and Maven
+java -version
+javac -version
+mvn -version
+
+# Create a Maven project
+mkdir -p ~/cloudsim-lab/src/main/java
+cd ~/cloudsim-lab
+
+# Create pom.xml (CloudSim 3.0.3)
+cat > pom.xml <<'EOF'
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>lab</groupId>
+  <artifactId>cloudsim-lab</artifactId>
+  <version>1.0</version>
+  <properties>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.cloudbus.cloudsim</groupId>
+      <artifactId>cloudsim</artifactId>
+      <version>3.0.3</version>
+    </dependency>
+  </dependencies>
+</project>
+EOF
+
+# Create Java source file for a question
+nano src/main/java/CloudSimExperiment.java
+
+# Compile and run (after adding the code)
+mvn compile
+mvn exec:java -Dexec.mainClass=CloudSimExperiment
+
+If Maven cannot download CloudSim 3.0.3, use the JAR and dependencies supplied by your college, or the version already configured in the lab. Do not mix CloudSim 3.x code with CloudSim Plus.
+
+3. Common concepts to remember
+
+Datacenter: represents the cloud infrastructure.
+
+Host: physical server inside the datacenter; has RAM, storage, bandwidth and CPU processing elements.
+
+VM: virtual machine allocated to a host.
+
+Cloudlet: a job/task executed by a VM.
+
+Broker: submits VMs and cloudlets and connects users to the simulated datacenter.
+
+Makespan: time from the first task start until the last task finishes; in a simple simulation starting at time 0, it is usually the maximum cloudlet finish time.
+
+Q40 (Original Q49) — Basic cloud simulation
+
+Create one datacenter, one host, one VM, and one cloudlet. The following code demonstrates the core setup and simulation flow.
+
+import org.cloudbus.cloudsim.*;
+import org.cloudbus.cloudsim.core.CloudSim;
+import java.util.*;
+
+public class CloudSimExperiment {
+    public static void main(String[] args) {
+        try {
+            int users = 1;
+            Calendar calendar = Calendar.getInstance();
+            boolean trace = false;
+            CloudSim.init(users, calendar, trace);
+
+            List<Pe> peList = new ArrayList<>();
+            peList.add(new Pe(0, new PeProvisionerSimple(1000)));
+
+            List<Host> hosts = new ArrayList<>();
+            hosts.add(new Host(
+                0,
+                new RamProvisionerSimple(2048),
+                new BwProvisionerSimple(10000),
+                1000000,
+                peList,
+                new VmSchedulerTimeShared(peList)
+            ));
+
+            DatacenterCharacteristics characteristics =
+                new DatacenterCharacteristics(
+                    "x86", "Linux", "Xen", hosts, 10.0,
+                    3.0, 0.05, 0.001, 0.0
+                );
+
+            Datacenter datacenter = new Datacenter(
+                "Datacenter_0", characteristics,
+                new VmAllocationPolicySimple(hosts),
+                new LinkedList<Storage>(), 0
+            );
+
+            DatacenterBroker broker = new DatacenterBroker("Broker");
+            int brokerId = broker.getId();
+
+            List<Vm> vms = new ArrayList<>();
+            vms.add(new Vm(0, brokerId, 1000, 1, 512,
+                1000, 10000, "Xen", new CloudletSchedulerTimeShared()));
+
+            broker.submitVmList(vms);
+
+            UtilizationModel utilization = new UtilizationModelFull();
+            List<Cloudlet> cloudlets = new ArrayList<>();
+            Cloudlet cloudlet = new Cloudlet(
+                0, 40000, 1, 300, 300,
+                utilization, utilization, utilization
+            );
+            cloudlet.setUserId(brokerId);
+            cloudlets.add(cloudlet);
+            broker.submitCloudletList(cloudlets);
+
+            CloudSim.startSimulation();
+            List<Cloudlet> result = broker.getCloudletReceivedList();
+            CloudSim.stopSimulation();
+
+            for (Cloudlet c : result) {
+                System.out.println("Cloudlet " + c.getCloudletId()
+                    + " Status: " + c.getStatus()
+                    + " Start: " + c.getExecStartTime()
+                    + " Finish: " + c.getFinishTime());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+Q41 (Original Q53) — Multiple VMs, cloudlets and makespan
+
+Keep the Q40 datacenter and broker setup. Replace its VM/cloudlet creation section with the following. Print the results after simulation.
+
+// Use the same imports, host/datacenter/broker setup as Q40.
+// Replace the VM and cloudlet creation sections with this code.
+
+List<Vm> vms = new ArrayList<>();
+for (int i = 0; i < 3; i++) {
+    vms.add(new Vm(i, brokerId, 1000, 1, 512,
+        1000, 10000, "Xen", new CloudletSchedulerTimeShared()));
+}
+broker.submitVmList(vms);
+
+UtilizationModel utilization = new UtilizationModelFull();
+List<Cloudlet> cloudlets = new ArrayList<>();
+long[] lengths = {20000, 40000, 60000, 30000, 50000};
+
+for (int i = 0; i < lengths.length; i++) {
+    Cloudlet c = new Cloudlet(i, lengths[i], 1, 300, 300,
+        utilization, utilization, utilization);
+    c.setUserId(brokerId);
+    cloudlets.add(c);
+}
+broker.submitCloudletList(cloudlets);
+
+// After CloudSim.startSimulation():
+List<Cloudlet> result = broker.getCloudletReceivedList();
+double makespan = 0;
+for (Cloudlet c : result) {
+    System.out.printf("Cloudlet %d VM %d Start %.2f Finish %.2f%n",
+        c.getCloudletId(), c.getVmId(), c.getExecStartTime(), c.getFinishTime());
+    makespan = Math.max(makespan, c.getFinishTime());
+}
+System.out.printf("Makespan: %.2f seconds%n", makespan);
+
+Q42 (Original Q57) — Custom cloudlet scheduling algorithm
+
+Create cloudlets as in Q41, then sort them by length before submitting. This implements SJF-style job ordering at submission time. For a truly different runtime scheduler, a custom CloudletScheduler class must be implemented.
+
+// Shortest-job-first (SJF) ordering before submitting cloudlets.
+// This is a simple custom scheduling policy at the broker submission level.
+// It sorts jobs by cloudlet length; the CloudSim VM scheduler still allocates CPU
+// according to the VM's configured CloudletScheduler.
+
+cloudlets.sort(Comparator.comparingLong(Cloudlet::getCloudletLength));
+broker.submitCloudletList(cloudlets);
+
+Q43 (Original Q61) — Compare custom scheduling with baseline
+
+Run the same workload with the baseline order and then with SJF order. Record makespan and average completion time. Use the same host, VM resources and cloudlet lengths in both runs for a fair comparison.
+
+// Create the same workload twice in separate simulations:
+// 1) Baseline: submit cloudlets in their original order.
+// 2) Custom SJF: sort cloudlets by CloudletLength before submission.
+// For each run, record each cloudlet's start and finish times and calculate:
+// makespan = maximum finish time; average finish time = sum(finish times)/count.
+// Compare the printed metrics. Reset CloudSim by starting a fresh simulation
+// process/run for each policy because CloudSim.init() is not intended to be
+// called repeatedly in one JVM session without careful reset/version handling.
+
+List<Cloudlet> sjfCloudlets = new ArrayList<>(cloudlets);
+sjfCloudlets.sort(Comparator.comparingLong(Cloudlet::getCloudletLength));
+broker.submitCloudletList(sjfCloudlets);
+
+Result interpretation
+
+The console should show cloudlet ID, status, VM ID, start time and finish time. A status of SUCCESS means the cloudlet completed. Makespan is the maximum finish time for a simulation starting at time zero. SJF may reduce average completion time for some workloads, but it does not guarantee a lower makespan in every setup.
